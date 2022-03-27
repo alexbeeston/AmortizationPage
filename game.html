@@ -16,7 +16,16 @@
 
 	<button @click="updateMessage()">Compute</button>
 
-	{{ displayMessage }}
+	<div v-if="showComputation">
+		<div v-if="computation.isPossible">
+			Years to pay: {{ computation.yearsToPay }} <br>
+			Months to pay: {{ computation.monthsToPay }} <br>
+			Final Payment: {{ formatter.format(computation.finalAmount) }}
+		</div>
+		<div v-else>
+			Loan not possible under given configurations
+		</div>
+	</div>
 </div>
 
 <script>
@@ -31,7 +40,8 @@
 	class ComputationResult {
 		constructor(isPossible, monthsToPay, finalAmount) {
 			this.isPossible = isPossible;
-			this.monthsToPay = monthsToPay;
+			this.yearsToPay = Math.floor(monthsToPay / 12);
+			this.monthsToPay = monthsToPay % 12;
 			this.finalAmount = finalAmount;
 		}
 	}
@@ -42,31 +52,35 @@
 				currentBalance: 299236.13,
 				interestRate: 0.035,
 				monthlyPayment: 2139.19,
-				displayMessage: ""
+				computation: undefined,
+				showComputation: false,
+				formatter: new Intl.NumberFormat('en-US', {
+					style: 'currency',
+					currency: 'USD',
+					minimumTractionDigits: 2
+				})
 			}
 		},
 		methods: {
-			computeMonthsToPay() {
+			performAndSetComputation() {
 				let balance = this.currentBalance;
 				let numMonths = 0;
 				while (balance > 0) {
 					let currentMonthInterst = this.interestRate * balance / 12;
 					if (currentMonthInterst > this.monthlyPayment) {
-						return new ComputationResult(false, -1, -1);
+						this.computation = new ComputationResult(false, -1, -1);
+						return;
 					}
 					let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
 					balance -= amountToPrincipal;
 					numMonths++;
 				}
-				return new ComputationResult(true, numMonths, balance * -1);
+				this.computation = new ComputationResult(true, numMonths, balance * -1);
 			},
 			updateMessage() {
-				// if (this.computeMonthsToPay() > 0) {
-				// 	return `Will take ${Math.floor(this.monthsToPay / 12)} years and ${this.monthsToPay % 12} to pay`;
-				// } else {
-				// 	return 'Loan not possible with this monthly payment';
-				// }
-				console.log(this.computeMonthsToPay());
+				this.showComputation = true;
+				this.performAndSetComputation();
+				console.log(this.computation);
 			}
 		}
 	}).mount('#app')
