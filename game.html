@@ -13,41 +13,61 @@
 	<input id='monthlyPaymentInput' type='number' v-model='monthlyPayment' />
 	<br>
 	<br>
-	
+
+	<button @click="updateMessage()">Compute</button>
+
 	{{ displayMessage }}
 </div>
 
 <script>
-  let dog = Vue.createApp({
-    data() {
-      return {
-        currentBalance: 299236.13,
-		interestRate: 0.035,
-		monthlyPayment: 2139.19 
-      }
-    },
-	computed: {
-		monthsToPay () {
-			let balance = this.currentBalance;
-			let numMonths = 0;
-			while (balance > 0) {
-				let currentMonthInterst = this.interestRate * balance / 12;
-				if (currentMonthInterst > this.monthlyPayment) {
-					return -1;
-				}
-				let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
-				balance -= amountToPrincipal;
-				numMonths++;
-			}
-			return numMonths;
-		},
-		displayMessage () {
-			if (this.monthsToPay > 0) {
-				return `Will take ${Math.floor(this.monthsToPay / 12)} years and ${this.monthsToPay % 12} to pay`;
-			} else {
-				return 'Loan not possible with this monthly payment';
-			}
+	class PrincipalOnlyPayment {
+		constructor() {
+			this.amount = 0;
+			this.frequency = 0;
+			this.firstOccurance = new Date();
 		}
 	}
-  }).mount('#app')
+
+	class ComputationResult {
+		constructor(isPossible, monthsToPay, finalAmount) {
+			this.isPossible = isPossible;
+			this.monthsToPay = monthsToPay;
+			this.finalAmount = finalAmount;
+		}
+	}
+
+	Vue.createApp({
+		data() {
+			return {
+				currentBalance: 299236.13,
+				interestRate: 0.035,
+				monthlyPayment: 2139.19,
+				displayMessage: ""
+			}
+		},
+		methods: {
+			computeMonthsToPay() {
+				let balance = this.currentBalance;
+				let numMonths = 0;
+				while (balance > 0) {
+					let currentMonthInterst = this.interestRate * balance / 12;
+					if (currentMonthInterst > this.monthlyPayment) {
+						return new ComputationResult(false, -1, -1);
+					}
+					let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
+					balance -= amountToPrincipal;
+					numMonths++;
+				}
+				return new ComputationResult(true, numMonths, balance * -1);
+			},
+			updateMessage() {
+				// if (this.computeMonthsToPay() > 0) {
+				// 	return `Will take ${Math.floor(this.monthsToPay / 12)} years and ${this.monthsToPay % 12} to pay`;
+				// } else {
+				// 	return 'Loan not possible with this monthly payment';
+				// }
+				console.log(this.computeMonthsToPay());
+			}
+		}
+	}).mount('#app')
 </script>
