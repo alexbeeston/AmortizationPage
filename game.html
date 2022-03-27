@@ -15,6 +15,7 @@
 	<br>
 
 	<button @click="updateMessage()">Compute</button>
+	<button @click="clear()">Clear</button>
 
 	<div v-if="showComputation">
 		<div v-if="computation.isPossible">
@@ -23,7 +24,8 @@
 			Final Payment: {{ formatter.format(computation.finalAmount) }}
 		</div>
 		<div v-else>
-			Loan not possible under given configurations
+			Loan not possible under given configurations <br>
+			{{ computation.message }}
 		</div>
 	</div>
 </div>
@@ -38,11 +40,12 @@
 	}
 
 	class ComputationResult {
-		constructor(isPossible, monthsToPay, finalAmount) {
+		constructor(isPossible, monthsToPay, finalAmount, message = '') {
 			this.isPossible = isPossible;
 			this.yearsToPay = Math.floor(monthsToPay / 12);
 			this.monthsToPay = monthsToPay % 12;
 			this.finalAmount = finalAmount;
+			this.message = message;
 		}
 	}
 
@@ -63,6 +66,11 @@
 		},
 		methods: {
 			performAndSetComputation() {
+				if (this.monthlyPayment == 0) {
+					this.computation = new ComputationResult(false, -1, -1, 'Monthly Payment must be greater than zero dollars');
+					return;
+				}
+
 				let balance = this.currentBalance;
 				let numMonths = 0;
 				while (balance > 0) {
@@ -80,8 +88,15 @@
 			updateMessage() {
 				this.showComputation = true;
 				this.performAndSetComputation();
-				console.log(this.computation);
+			},
+			clear () {
+				this.currentBalance = 0;
+				this.interestRate = 0;
+				this.monthlyPayment = 0;
+				computation = undefined;
+				this.showComputation = false;
 			}
+
 		}
 	}).mount('#app')
 </script>
