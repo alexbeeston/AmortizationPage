@@ -1,0 +1,53 @@
+<script src="https://unpkg.com/vue@3"></script>
+
+<div id="app">
+	<label for='currentBalanceInput'>Current Balance</label>
+	<input id='currentBalanceInput' type='number' v-model='currentBalance' />
+	<br>
+
+	<label for='interestRateInput'>Interest Rate</label>
+	<input id='interestRateInput' type='number' v-model='interestRate' />
+	<br>
+
+	<label for='monthlyPaymentInput'>Monthly Payment</label>
+	<input id='monthlyPaymentInput' type='number' v-model='monthlyPayment' />
+	<br>
+	<br>
+	
+	{{ displayMessage }}
+</div>
+
+<script>
+  let dog = Vue.createApp({
+    data() {
+      return {
+        currentBalance: 299236.13,
+		interestRate: 0.035,
+		monthlyPayment: 2139.19 
+      }
+    },
+	computed: {
+		monthsToPay () {
+			let balance = this.currentBalance;
+			let numMonths = 0;
+			while (balance > 0) {
+				let currentMonthInterst = this.interestRate * balance / 12;
+				if (currentMonthInterst > this.monthlyPayment) {
+					return -1;
+				}
+				let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
+				balance -= amountToPrincipal;
+				numMonths++;
+			}
+			return numMonths;
+		},
+		displayMessage () {
+			if (this.monthsToPay > 0) {
+				return `Will take ${Math.floor(this.monthsToPay / 12)} years and ${this.monthsToPay % 12} to pay`;
+			} else {
+				return 'Loan not possible with this monthly payment';
+			}
+		}
+	}
+  }).mount('#app')
+</script>
