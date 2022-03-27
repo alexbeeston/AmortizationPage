@@ -1,5 +1,11 @@
 <script src="https://unpkg.com/vue@3"></script>
 
+<style>
+	table {
+		border: 1px solid black
+	}
+</style>
+
 <div id="app">
 	<label for='currentBalanceInput'>Current Balance</label>
 	<input id='currentBalanceInput' type='number' v-model='currentBalance' />
@@ -11,6 +17,31 @@
 
 	<label for='monthlyPaymentInput'>Monthly Payment</label>
 	<input id='monthlyPaymentInput' type='number' v-model='monthlyPayment' />
+	<br>
+	<br>
+
+	<button @click='addPrincipalOnlyPayment'>Add Principal only Payment</button>
+
+	<br><br>
+	<div>
+		<table>
+			<tr>
+				<th>Memo</th>
+				<th>Amount</th>
+				<th>Start Date</th>
+				<th>Frequency</th>
+				<th>End Date</th>
+			</tr>
+			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
+				<td><input type="text" /></td>
+				<td><input type="number" /></td>
+				<td><input type="date" /></td>
+				<td><input type="text" /></td>
+				<td><input type="date" /></td>
+			</tr>
+		</table>
+	</div>
+
 	<br>
 	<br>
 
@@ -56,12 +87,13 @@
 				interestRate: 0.035,
 				monthlyPayment: 2139.19,
 				computation: undefined,
+				principalOnlyPayments: [new PrincipalOnlyPayment()],
 				showComputation: false,
 				formatter: new Intl.NumberFormat('en-US', {
 					style: 'currency',
 					currency: 'USD',
 					minimumTractionDigits: 2
-				})
+				}),
 			}
 		},
 		methods: {
@@ -89,7 +121,10 @@
 				this.showComputation = true;
 				this.performAndSetComputation();
 			},
-			clear () {
+			addPrincipalOnlyPayment() {
+				this.principalOnlyPayments.push(new PrincipalOnlyPayment());
+			},
+			clear() {
 				this.currentBalance = 0;
 				this.interestRate = 0;
 				this.monthlyPayment = 0;
