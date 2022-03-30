@@ -1,13 +1,151 @@
 <script src="https://unpkg.com/vue@3"></script>
 
-<div id="app">{{ message }}</div>
+<style>
+	table {
+		border: 1px solid black
+	}
+</style>
+
+<div id="app">
+	<label for='currentBalanceInput'>Current Balance</label>
+	<input id='currentBalanceInput' type='number' v-model='currentBalance' />
+	<br>
+
+	<label for='interestRateInput'>Interest Rate</label>
+	<input id='interestRateInput' type='number' v-model='interestRate' />
+	<br>
+
+	<label for='monthlyPaymentInput'>Monthly Payment</label>
+	<input id='monthlyPaymentInput' type='number' v-model='monthlyPayment' />
+	<br>
+	<br>
+
+	<button @click='addPrincipalOnlyPayment'>Add Principal Only Payment</button>
+
+	<br><br>
+	<div>
+		<table>
+			<tr>
+				<th>Memo</th>
+				<th>Amount</th>
+				<th>Start Date</th>
+				<th>End Date</th>
+			</tr>
+			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
+				<td><input type="text" /></td>
+				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
+				<td><input type="date" v-model="principalOnlyPayment.startDateString" /></td>
+				<td><input type="date" v-model="principalOnlyPayment.endDateString" /></td>
+			</tr>
+		</table>
+	</div>
+
+	<br>
+	<br>
+
+	<button @click="updateMessage()">Compute</button>
+	<button @click="clear()">Clear</button>
+
+	<div v-if="showComputation">
+		<div v-if="computation.isPossible">
+			Years to pay: {{ computation.yearsToPay }} <br>
+			Months to pay: {{ computation.monthsToPay }} <br>
+			Final Payment: {{ formatter.format(computation.finalAmount) }}
+		</div>
+		<div v-else>
+			Loan not possible under given configurations <br>
+			{{ computation.message }}
+		</div>
+	</div>
+</div>
 
 <script>
-  Vue.createApp({
-    data() {
-      return {
-        message: 'Hello Vue!'
-      }
-    }
-  }).mount('#app')
+	class PrincipalOnlyPayment {
+		constructor() {
+			this.amount = 0;
+			this.frequency = 0;
+			this.startDateString = "";
+			this.endDateSTring = "";
+		}
+	}
+
+	class ComputationResult {
+		constructor(isPossible, monthsToPay, finalAmount, message = '') {
+			this.isPossible = isPossible;
+			this.yearsToPay = Math.floor(monthsToPay / 12);
+			this.monthsToPay = monthsToPay % 12;
+			this.finalAmount = finalAmount;
+			this.message = message;
+		}
+	}
+
+	const frequencyOptions = [
+		'Once',
+		'Monthly',
+		'Quarterly',
+		'Semiannually',
+		'Annually'
+	]
+
+	let app = Vue.createApp({
+		data() {
+			return {
+				currentBalance: 299236.13,
+				interestRate: 0.035,
+				monthlyPayment: 2139.19,
+				computation: undefined,
+				principalOnlyPayments: [new PrincipalOnlyPayment()],
+				showComputation: false,
+				formatter: new Intl.NumberFormat('en-US', {
+					style: 'currency',
+					currency: 'USD',
+					minimumTractionDigits: 2
+				}),
+				frequencyOptions: [
+					{ 'text': 'Once', value: 0 },
+					{ 'text': 'Monthly', value: 1 },
+					{ 'text': 'Quarterly', value: 'A' },
+					{ 'text': 'Semiannually', value: 'A' },
+					{ 'text': 'Annually', value: 'A' },
+				]
+			}
+		},
+		methods: {
+			performAndSetComputation() {
+				if (this.monthlyPayment == 0) {
+					this.computation = new ComputationResult(false, -1, -1, 'Monthly Payment must be greater than zero dollars');
+					return;
+				}
+
+				let balance = this.currentBalance;
+				let numMonths = 0;
+				while (balance > 0) {
+					let currentMonthInterst = this.interestRate * balance / 12;
+					if (currentMonthInterst > this.monthlyPayment) {
+						this.computation = new ComputationResult(false, -1, -1);
+						return;
+					}
+					let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
+					balance -= amountToPrincipal;
+					numMonths++;
+				}
+				this.computation = new ComputationResult(true, numMonths, balance * -1);
+			},
+			updateMessage() {
+				this.showComputation = true;
+				this.performAndSetComputation();
+			},
+			addPrincipalOnlyPayment() {
+				this.principalOnlyPayments.push(new PrincipalOnlyPayment());
+			},
+			clear() {
+				this.currentBalance = 0;
+				this.interestRate = 0;
+				this.monthlyPayment = 0;
+				computation = undefined;
+				this.showComputation = false;
+			}
+
+		}
+	}).mount('#app')
 </script>
