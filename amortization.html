@@ -29,12 +29,16 @@
 				<th>Memo</th>
 				<th>Amount</th>
 				<th>Start Date</th>
+				<th>Frequency</th>
 				<th>End Date</th>
 			</tr>
 			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
 				<td><input type="text" /></td>
 				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
 				<td><input type="date" v-model="principalOnlyPayment.startDateString" /></td>
+				<td><select v-model="principalOnlyPayment.frequency">
+					<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
+				</select></td>
 				<td><input type="date" v-model="principalOnlyPayment.endDateString" /></td>
 			</tr>
 		</table>
@@ -101,13 +105,7 @@
 					currency: 'USD',
 					minimumTractionDigits: 2
 				}),
-				frequencyOptions: [
-					{ 'text': 'Once', value: 0 },
-					{ 'text': 'Monthly', value: 1 },
-					{ 'text': 'Quarterly', value: 'A' },
-					{ 'text': 'Semiannually', value: 'A' },
-					{ 'text': 'Annually', value: 'A' },
-				]
+				frequencyOptions: frequencyOptions.map((item, index) => { return { text: item, value: index} }),
 			}
 		},
 		methods: {
