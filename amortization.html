@@ -40,20 +40,15 @@
 			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
 				<td><input type="text" /></td>
 				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
-				<td><input
-					type="date"
-					v-model="principalOnlyPayment.startDateString"
-					:min="formatDateForHTMLAttribute(getMinStartDate())" />
+				<td><input type="date" v-model="principalOnlyPayment.startDateString"
+						:min="formatDateForHTMLAttribute(getMinStartDate())" />
 				</td>
 				<td><select v-model="principalOnlyPayment.frequency">
 						<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
 					</select>
 				</td>
-				<td><input
-					type="date"
-					v-model="principalOnlyPayment.endDateString"
-					:disabled="principalOnlyPayment.frequency==0"
-					:min="principalOnlyPayment.startDateString" />
+				<td><input type="date" v-model="principalOnlyPayment.endDateString"
+						:disabled="principalOnlyPayment.frequency==0" :min="principalOnlyPayment.startDateString" />
 				</td>
 			</tr>
 		</table>
@@ -85,7 +80,9 @@
 			this.amount = 0;
 			this.frequency = 0;
 			this.startDateString = "";
-			this.endDateSTring = "";
+			this.endDateString = "";
+			this.startDateDate;
+			this.endDateDate;
 		}
 	}
 
@@ -126,6 +123,7 @@
 		},
 		methods: {
 			performAndSetComputation() {
+				this.parseAndSetDates();
 				if (this.monthlyPayment == 0) {
 					this.computation = new ComputationResult(false, -1, -1, 'Monthly Payment must be greater than zero dollars');
 					return;
@@ -144,6 +142,20 @@
 					numMonths++;
 				}
 				this.computation = new ComputationResult(true, numMonths, balance * -1);
+			},
+			parseAndSetDates() {
+				for (let extraPayment of this.principalOnlyPayments) {
+					var parts = extraPayment.startDateString.split("-")
+					extraPayment.startDateDate = new Date(parts[2], parts[1] - 1, parts[0])
+					// https://stackoverflow.com/questions/7556591/is-the-javascript-date-object-always-one-day-off
+
+					extraPayment.startDateDate = new Date(extraPayment.startDateString);
+					extraPayment.endDateDate = new Date(extraPayment.endDateString);
+				}
+
+				for (let extraPayment of this.principalOnlyPayments) {
+					console.log(extraPayment.startDateDate)
+				}
 			},
 			updateMessage() {
 				this.showComputation = true;
@@ -168,6 +180,12 @@
 			},
 			formatDateForHTMLAttribute(date) {
 				return date.toISOString().split('T')[0]
+			},
+			getExtraPrincipal(monthIndex) {
+				let totalPrincipalOnlyPayment = 0;
+				for (let extraPayment of this.principalOnlyPayments) {
+					// filter on dates
+				}
 			}
 		}
 	}).mount('#app')
