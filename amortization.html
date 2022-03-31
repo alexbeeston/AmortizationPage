@@ -39,12 +39,21 @@
 			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
 				<td><input type="text" /></td>
 				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
-				<td><input type="date" v-model="principalOnlyPayment.startDateString" min="2022-04-01" /></td>
+				<td><input
+					type="date"
+					v-model="principalOnlyPayment.startDateString"
+					:min="getMinDateStringAttribute()" />
+				</td>
 				<td><select v-model="principalOnlyPayment.frequency">
 						<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
-					</select></td>
-				<td><input type="date" v-model="principalOnlyPayment.endDateString"
-						:disabled="principalOnlyPayment.frequency==0" /></td>
+					</select>
+				</td>
+				<td><input
+					type="date"
+					v-model="principalOnlyPayment.endDateString"
+					:disabled="principalOnlyPayment.frequency==0"
+					:min="getMinDateStringAttribute()" />
+				</td>
 			</tr>
 		</table>
 	</div>
@@ -95,7 +104,7 @@
 		'Quarterly',
 		'Semiannually',
 		'Annually'
-	]
+	];
 
 	let app = Vue.createApp({
 		data() {
@@ -148,8 +157,13 @@
 				this.monthlyPayment = 0;
 				computation = undefined;
 				this.showComputation = false;
+			},
+			getMinDateStringAttribute() {
+				let minDate = new Date();
+				minDate.setMonth(minDate.getMonth() + 1);
+				minDate.setDate(1);
+				return minDate.toISOString().split('T')[0]
 			}
-
 		}
 	}).mount('#app')
 </script>
