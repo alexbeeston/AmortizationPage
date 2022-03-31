@@ -17,8 +17,12 @@
 
 	<label for='monthlyPaymentInput'>Monthly Payment</label>
 	<input id='monthlyPaymentInput' type='number' v-model='monthlyPayment' />
-	<br>
-	<br>
+
+	<h4>Assumptions</h4>
+	<ul>
+		<li>Base payments are made on the first day of each month</li>
+		<li>The first payment is made starting the next month</li>
+	</ul>
 
 	<button @click='addPrincipalOnlyPayment'>Add Principal Only Payment</button>
 
@@ -35,11 +39,12 @@
 			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
 				<td><input type="text" /></td>
 				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
-				<td><input type="date" v-model="principalOnlyPayment.startDateString" /></td>
+				<td><input type="date" v-model="principalOnlyPayment.startDateString" min="2022-04-01" /></td>
 				<td><select v-model="principalOnlyPayment.frequency">
-					<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
-				</select></td>
-				<td><input type="date" v-model="principalOnlyPayment.endDateString" /></td>
+						<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
+					</select></td>
+				<td><input type="date" v-model="principalOnlyPayment.endDateString"
+						:disabled="principalOnlyPayment.frequency==0" /></td>
 			</tr>
 		</table>
 	</div>
@@ -61,6 +66,7 @@
 			{{ computation.message }}
 		</div>
 	</div>
+
 </div>
 
 <script>
@@ -105,7 +111,7 @@
 					currency: 'USD',
 					minimumTractionDigits: 2
 				}),
-				frequencyOptions: frequencyOptions.map((item, index) => { return { text: item, value: index} }),
+				frequencyOptions: frequencyOptions.map((item, index) => { return { text: item, value: index } }),
 			}
 		},
 		methods: {
