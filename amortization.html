@@ -52,7 +52,7 @@
 					type="date"
 					v-model="principalOnlyPayment.endDateString"
 					:disabled="principalOnlyPayment.frequency==0"
-					:min="formatDateForHTMLAttribute(getMinEndDate(principalOnlyPayment.startDateString))" />
+					:min="principalOnlyPayment.startDateString" />
 				</td>
 			</tr>
 		</table>
@@ -160,22 +160,12 @@
 			},
 			getMinStartDate() {
 				let minDate = new Date();
-				minDate.setMonth(minDate.getMonth() + 1);
 				minDate.setDate(1);
-				console.log('get mind START date');
+				minDate.setMonth(minDate.getMonth() + 1);
 				return minDate;
 			},
-			getMinEndDate(startDate) {
-				console.log('get mind END date');
-				if (startDate < 
-
-				// return the larger of the two
-
-				// tehe
-			},
 			formatDateForHTMLAttribute(date) {
-				console.log('formatter');
-				return minDate.toISOString().split('T')[0]
+				return date.toISOString().split('T')[0]
 			}
 		}
 	}).mount('#app')
