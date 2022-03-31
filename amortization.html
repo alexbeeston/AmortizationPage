@@ -42,7 +42,7 @@
 				<td><input
 					type="date"
 					v-model="principalOnlyPayment.startDateString"
-					:min="getMinDateStringAttribute()" />
+					:min="formatDateForHTMLAttribute(getMinStartDate())" />
 				</td>
 				<td><select v-model="principalOnlyPayment.frequency">
 						<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
@@ -52,7 +52,7 @@
 					type="date"
 					v-model="principalOnlyPayment.endDateString"
 					:disabled="principalOnlyPayment.frequency==0"
-					:min="getMinDateStringAttribute()" />
+					:min="formatDateForHTMLAttribute(getMinEndDate(principalOnlyPayment.startDateString))" />
 				</td>
 			</tr>
 		</table>
@@ -158,10 +158,23 @@
 				computation = undefined;
 				this.showComputation = false;
 			},
-			getMinDateStringAttribute() {
+			getMinStartDate() {
 				let minDate = new Date();
 				minDate.setMonth(minDate.getMonth() + 1);
 				minDate.setDate(1);
+				console.log('get mind START date');
+				return minDate;
+			},
+			getMinEndDate(startDate) {
+				console.log('get mind END date');
+				if (startDate < 
+
+				// return the larger of the two
+
+				// tehe
+			},
+			formatDateForHTMLAttribute(date) {
+				console.log('formatter');
 				return minDate.toISOString().split('T')[0]
 			}
 		}
