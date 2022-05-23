@@ -20,9 +20,8 @@
 
 	<h4>Assumptions</h4>
 	<ul>
-		<li>Base payments are made on the first day of each month</li>
-		<li>Principal only payments are made after the base payments</li>
-		<li>The first payment is made starting the next month</li>
+		<li>Scheduled payments are made on the first day of each month if there is an outstanding balance on the loan</li>
+		<li>Principal only payments are applied before the scheduled payment </li>
 	</ul>
 
 	<button @click='addPrincipalOnlyPayment'>Add Principal Only Payment</button>
@@ -191,43 +190,16 @@
 	}).mount('#app')
 </script>
 
+<!--
 
+Forget the index of the month of the year, it doesn't matter (it doesn't matter if there's 12 month in a year or 39, for recurring payment,
+we're just designating a point in time at which the payments will begin, and then moding off that start count)	
 
+if
+	(counter >= startMonthIndex) &&
+	(counter <= endMonthIndex)
+	(counter - startMonth) % frequency == 0
 
-
-0 = April
-
-
-quarterly payments starting in September (i = 5)
-
-
-5, 8, 12,
-
-
-
-Jan
-Feb
-Mar
-Apr
-May
-Jun
-Jul
-Aug
-Sep
-Oct
-Nov
-Dec
-
-
-Given currently month counter and starting month, and for each rule:
-- first month counter (8
-- frequency	      (3
-
-return bool should add payment
-
-if startDate < current < endDate &&
-(indexOfFirstMonth) % frequency == (counter + startingMonth) % frequency
-
-(10) % (6) == (7 + 3) % 6 true
-
-(10) % (6) == (13 + 3) % 6  true
+TODO
+- instead of a date selector, make a month and year selector for dates
+-->
