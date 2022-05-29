@@ -30,25 +30,23 @@
 	<div>
 		<table>
 			<tr>
-				<th>Memo</th>
 				<th>Amount</th>
-				<th>Start Date</th>
+				<th>Start Month</th>
+				<th>Start Year</th>
 				<th>Frequency</th>
-				<th>End Date</th>
+				<th>End Month</th>
+				<th>End Year</th>
 			</tr>
 			<tr v-for='principalOnlyPayment in principalOnlyPayments'>
-				<td><input type="text" /></td>
 				<td><input type="number" v-model="principalOnlyPayment.amount" /></td>
-				<td><input type="date" v-model="principalOnlyPayment.startDateString"
-						:min="formatDateForHTMLAttribute(getMinStartDate())" />
-				</td>
+				<td><select v-model="principalOnlyPayment.startMonth"><option v-for="month in months" :value="month.index">{{ month.monthName }}</option></select></td>
+				<td><input type="number" min="2022" step="1" v-model="principalOnlyPayment.startYear" /></td>
 				<td><select v-model="principalOnlyPayment.frequency">
 						<option v-for="option in frequencyOptions" :value="option.value">{{ option.text }}</option>
 					</select>
 				</td>
-				<td><input type="date" v-model="principalOnlyPayment.endDateString"
-						:disabled="principalOnlyPayment.frequency==0" :min="principalOnlyPayment.startDateString" />
-				</td>
+				<td><select v-model="principalOnlyPayment.endMonth"><option v-for="month in months" :value="month.index">{{ month.monthName }}</option></select></td>
+				<td><input type="number" min="2022" step="1" v-model="principalOnlyPayment.endYear" /></td>
 			</tr>
 		</table>
 	</div>
@@ -56,7 +54,7 @@
 	<br>
 	<br>
 
-	<button @click="updateMessage()">Compute</button>
+	<button @click="onSubmit()">Compute</button>
 	<button @click="clear()">Clear</button>
 
 	<div v-if="showComputation">
@@ -77,11 +75,11 @@
 	class PrincipalOnlyPayment {
 		constructor() {
 			this.amount = 0;
+			this.startMonth = 0;
+			this.startYear = 0;
 			this.frequency = 0;
-			this.startDateString = "";
-			this.endDateString = "";
-			this.startDateDate;
-			this.endDateDate;
+			this.endMonth = 0;
+			this.endYear = 0;
 		}
 	}
 
@@ -103,6 +101,21 @@
 		'Annually'
 	];
 
+	const months = [
+		{ monthName: 'January', index: 0 },
+		{ monthName: 'February', index: 1 },
+		{ monthName: 'March', index: 2 },
+		{ monthName: 'April', index: 3 },
+		{ monthName: 'May', index: 4 },
+		{ monthName: 'June', index: 5 },
+		{ monthName: 'July', index: 6 },
+		{ monthName: 'August', index: 7 },
+		{ monthName: 'September', index: 8 },
+		{ monthName: 'October', index: 9 },
+		{ monthName: 'November', index: 10 },
+		{ monthName: 'December', index: 11 },
+	]
+
 	let app = Vue.createApp({
 		data() {
 			return {
@@ -118,47 +131,39 @@
 					minimumTractionDigits: 2
 				}),
 				frequencyOptions: frequencyOptions.map((item, index) => { return { text: item, value: index } }),
+				months: months,
 			}
 		},
 		methods: {
-			performAndSetComputation() {
-				this.parseAndSetDates();
-				if (this.monthlyPayment == 0) {
-					this.computation = new ComputationResult(false, -1, -1, 'Monthly Payment must be greater than zero dollars');
-					return;
+			onSubmit() {
+				for (let payment of this.principalOnlyPayments) {
+					console.log(payment.amount);
+					console.log(payment.startMonth);
+					console.log(payment.startYear);
+					console.log(payment.frequency);
+					console.log(payment.endMonth);
+					console.log(payment.endYear);
+					console.log('------');
 				}
+				// this.showComputation = true;
+				// if (this.monthlyPayment == 0) {
+				// 	this.computation = new ComputationResult(false, -1, -1, 'Monthly Payment must be greater than zero dollars');
+				// 	return;
+				// }
 
-				let balance = this.currentBalance;
-				let numMonths = 0;
-				while (balance > 0) {
-					let currentMonthInterst = this.interestRate * balance / 12;
-					if (currentMonthInterst > this.monthlyPayment) {
-						this.computation = new ComputationResult(false, -1, -1);
-						return;
-					}
-					let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
-					balance -= amountToPrincipal;
-					numMonths++;
-				}
-				this.computation = new ComputationResult(true, numMonths, balance * -1);
-			},
-			parseAndSetDates() {
-				for (let extraPayment of this.principalOnlyPayments) {
-					var parts = extraPayment.startDateString.split("-")
-					extraPayment.startDateDate = new Date(parts[2], parts[1] - 1, parts[0])
-					// https://stackoverflow.com/questions/7556591/is-the-javascript-date-object-always-one-day-off
-
-					extraPayment.startDateDate = new Date(extraPayment.startDateString);
-					extraPayment.endDateDate = new Date(extraPayment.endDateString);
-				}
-
-				for (let extraPayment of this.principalOnlyPayments) {
-					console.log(extraPayment.startDateDate)
-				}
-			},
-			updateMessage() {
-				this.showComputation = true;
-				this.performAndSetComputation();
+				// let balance = this.currentBalance;
+				// let numMonths = 0;
+				// while (balance > 0) {
+				// 	let currentMonthInterst = this.interestRate * balance / 12;
+				// 	if (currentMonthInterst > this.monthlyPayment) {
+				// 		this.computation = new ComputationResult(false, -1, -1);
+				// 		return;
+				// 	}
+				// 	let amountToPrincipal = this.monthlyPayment - currentMonthInterst;
+				// 	balance -= amountToPrincipal;
+				// 	numMonths++;
+				// }
+				// this.computation = new ComputationResult(true, numMonths, balance * -1);
 			},
 			addPrincipalOnlyPayment() {
 				this.principalOnlyPayments.push(new PrincipalOnlyPayment());
@@ -170,21 +175,6 @@
 				computation = undefined;
 				this.showComputation = false;
 				this.principalOnlyPayments = [new PrincipalOnlyPayment()];
-			},
-			getMinStartDate() {
-				let minDate = new Date();
-				minDate.setDate(1);
-				minDate.setMonth(minDate.getMonth() + 1);
-				return minDate;
-			},
-			formatDateForHTMLAttribute(date) {
-				return date.toISOString().split('T')[0]
-			},
-			getExtraPrincipal(monthIndex) {
-				let totalPrincipalOnlyPayment = 0;
-				for (let extraPayment of this.principalOnlyPayments) {
-					// filter on dates
-				}
 			}
 		}
 	}).mount('#app')
@@ -202,4 +192,4 @@ if
 
 TODO
 - instead of a date selector, make a month and year selector for dates
--->
+-date validation:->
